@@ -46,7 +46,6 @@ class Bigloo < Formula
       --prefix=#{prefix}
       --mandir=#{man1}
       --infodir=#{info}
-      --os-macosx
       --customgc=no
       --customlibuv=no
       --native=yes
@@ -56,6 +55,8 @@ class Bigloo < Formula
       --disable-srfi27
       --jvm=yes
     ]
+
+    args << "--os-macosx" if OS.mac?
 
     system "./configure", *args
 
