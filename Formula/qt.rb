@@ -54,7 +54,9 @@ class Qt < Formula
     depends_on "fontconfig"
     depends_on "glib"
     depends_on "gperf"
+    depends_on "gcc" # needs c++17
     depends_on "icu4c"
+    depends_on "libheif"
     depends_on "libproxy"
     depends_on "libxkbcommon"
     depends_on "libice"
@@ -72,6 +74,7 @@ class Qt < Formula
     depends_on "xcb-util-wm"
     depends_on "zstd"
     depends_on "wayland"
+    fails_with gcc: "5"
   end
 
   def install
@@ -80,6 +83,10 @@ class Qt < Formula
     # It is not friendly to Homebrew or macOS
     # because on macOS `/tmp` -> `/private/tmp`
     inreplace "qtbase/CMakeLists.txt", "FATAL_ERROR", ""
+
+    # Workaround for disk space issues on github actions
+    # https://github.com/Homebrew/linuxbrew-core/pull/19595
+    system "/home/linuxbrew/.linuxbrew/bin/brew", "cleanup", "--prune=0" if ENV["HOMEBREW_GITHUB_ACTIONS"]
 
     config_args = %W[
       -release
@@ -134,10 +141,12 @@ class Qt < Formula
       include.install_symlink path => path.parent.basename(".framework")
     end
 
-    mkdir libexec
-    Pathname.glob("#{bin}/*.app") do |app|
-      mv app, libexec
-      bin.write_exec_script "#{libexec/app.stem}.app/Contents/MacOS/#{app.stem}"
+    if OS.mac?
+      mkdir libexec
+      Pathname.glob("#{bin}/*.app") do |app|
+        mv app, libexec
+        bin.write_exec_script "#{libexec/app.stem}.app/Contents/MacOS/#{app.stem}"
+      end
     end
   end
 
