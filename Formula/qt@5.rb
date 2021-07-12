@@ -7,6 +7,7 @@ class QtAT5 < Formula
   mirror "https://mirrors.dotsrc.org/qtproject/archive/qt/5.15/5.15.2/single/qt-everywhere-src-5.15.2.tar.xz"
   mirror "https://mirrors.ocf.berkeley.edu/qt/archive/qt/5.15/5.15.2/single/qt-everywhere-src-5.15.2.tar.xz"
   sha256 "3a530d1b243b5dec00bc54937455471aaa3e56849d2593edb8ded07228202240"
+  revision 1 unless OS.mac?
   license all_of: ["GFDL-1.3-only", "GPL-2.0-only", "GPL-3.0-only", "LGPL-2.1-only", "LGPL-3.0-only"]
 
   bottle do
@@ -30,6 +31,7 @@ class QtAT5 < Formula
   unless OS.mac?
     depends_on "at-spi2-core"
     depends_on "fontconfig"
+    depends_on "gcc"
     depends_on "glib"
     depends_on "gperf"
     depends_on "icu4c"
@@ -51,6 +53,8 @@ class QtAT5 < Formula
     depends_on "xcb-util-wm"
     depends_on "zstd"
     depends_on "wayland"
+
+    fails_with gcc: "5"
   end
 
   # Find SDK for 11.x macOS
@@ -58,6 +62,24 @@ class QtAT5 < Formula
   patch do
     url "https://raw.githubusercontent.com/Homebrew/formula-patches/92d4cf/qt/5.15.2.diff"
     sha256 "fa99c7ffb8a510d140c02694a11e6c321930f43797dbf2fe8f2476680db4c2b2"
+  end
+
+  patch do
+    url "https://invent.kde.org/qt/qt/qtbase/commit/8252ef5fc6d043004ddf7085e1c1fe1bf2ca39f7.patch"
+    sha256 "8ab742b991ed5c43e8da4b1ce1982fd38fe611aaac3d57ee37728b59932b518a"
+    directory "qtbase"
+  end
+
+  patch do
+    url "https://invent.kde.org/qt/qt/qtbase/commit/cb2da673f53815a5cfe15f50df49b98032429f9e.patch"
+    sha256 "33304570431c0dd3becc22f3f0911ccfc781a1ce6c7926c3acb08278cd2e60c3"
+    directory "qtbase"
+  end
+
+  patch do
+    url "https://invent.kde.org/qt/qt/qtdeclarative/commit/4f08a2da5b0da675cf6a75683a43a106f5a1e7b8.patch"
+    sha256 "193c2e159eccc0592b7092b1e9ff31ad9556b38462d70633e507822f75d4d24a"
+    directory "qtdeclarative"
   end
 
   # Patch for qmake on ARM
@@ -160,6 +182,12 @@ class QtAT5 < Formula
   end
 
   test do
+    unless OS.mac?
+      gcc = Formula["gcc"]
+      gcc_major_ver = gcc.any_installed_version.major
+      ENV["QMAKE_CXX"] = "#{Formula["gcc"].opt_bin}/g++-#{gcc_major_ver}"
+    end
+
     (testpath/"hello.pro").write <<~EOS
       QT       += core
       QT       -= gui
