@@ -1,10 +1,9 @@
 class Texlive < Formula
   desc "Free software distribution for the TeX typesetting system"
   homepage "https://www.tug.org/texlive/"
-  url "https://www.texlive.info/tlnet-archive/2020/07/15/tlnet/install-tl-unx.tar.gz"
-  version "20200715"
-  sha256 "517058e56756521c3ab1b1939e5e95659adc715ba27babdff41b96bd299e3d20"
-  revision 1
+  url "https://www.texlive.info/tlnet-archive/2021/04/15/tlnet/install-tl-unx.tar.gz"
+  version "20210415"
+  sha256 "eae3c20c7d543e27f72370caef35d2026b413c90cf3ba6e9d942d32325e534c7"
   head "http://mirror.ctan.org/systems/texlive/tlnet/install-tl-unx.tar.gz"
 
   depends_on "wget" => :build
@@ -23,7 +22,7 @@ class Texlive < Formula
   def install
     ohai "Downloading and installing TeX Live. This will take a few minutes."
 
-    ENV["TEXLIVE_INSTALL_PREFIX"] = libexec
+    ENV["TEXLIVE_INSTALL_PREFIX"] = prefix
 
     File.write("texlive.profile", <<-END
       selected_scheme scheme-small
